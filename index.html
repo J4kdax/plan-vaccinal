@@ -80,6 +80,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .strip { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; padding: 8px 24px; max-width: 1500px; margin: 0 auto; font-size: 13px; color: var(--muted); }
 .strip b { color: var(--ink); }
 .strip .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); display: inline-block; margin-right: 6px; }
+.linkbtn { border: 0; background: none; padding: 0; color: var(--accent); text-decoration: underline; cursor: pointer; font-size: 13px; }
 .strip-bar { border-bottom: 1px solid var(--line); background: var(--sheet); }
 
 /* ---------- Mise en page ---------- */
@@ -242,7 +243,8 @@ input[type=number] { width: 86px; }
 </header>
 <div class="strip-bar">
   <div class="strip">
-    <span id="exampleBanner"><span class="dot"></span><b>Exemple fictif</b> · adulte de 41 ans, Kenya puis Tanzanie. Modifiez les champs ou cliquez sur « Nouveau patient ».</span>
+    <span id="exampleBanner" hidden><span class="dot"></span><b>Exemple fictif chargé</b> · adulte de 41 ans, Kenya puis Tanzanie. Cliquez sur « Nouveau patient » pour repartir de zéro.</span>
+    <button type="button" class="linkbtn" id="btnExample">Voir un exemple (Kenya puis Tanzanie)</button>
     <span>Rien n'est enregistré ni transmis : calcul dans le navigateur. Ne saisissez pas d'identité.</span>
   </div>
 </div>
@@ -1426,6 +1428,14 @@ function update() {
     ${flags ? `<div class="flags">${flags}</div>` : ""}
     <div class="sbar" role="img" aria-label="Répartition des statuts">${order.filter(s => counts[s]).map(s => `<span class="c-${s}" style="flex:${counts[s]}"></span>`).join("")}</div>
     <div class="legend">${order.filter(s => counts[s]).map(s => `<span><i class="c-${s}"></i>${ST_LABEL[s]} <b>${counts[s]}</b></span>`).join("")}</div>`;
+  if (!nStops) {
+    $("summary").innerHTML = `<div class="empty"><b>Nouveau patient</b><br>Renseignez le voyageur puis ajoutez au moins une étape à l'itinéraire : les recommandations s'afficheront ici.</div>`;
+    $("timeline").hidden = true; $("alerts").innerHTML = ""; $("groups").innerHTML = "";
+    $("jump").innerHTML = "Voir le plan";
+    $("sum1").textContent = P.ageM == null ? "à renseigner" : ageText(P.ageM);
+    $("sum2").textContent = "itinéraire à saisir"; $("sum3").textContent = ""; $("sum4").textContent = "";
+    return;
+  }
   const tl = timelineHtml(r, inp.trip.departure);
   $("timeline").innerHTML = tl; $("timeline").hidden = !tl;
   const al = [...r.alerts.filter(a => a.lvl === "crit"), ...r.alerts.filter(a => a.lvl === "warn"), ...r.alerts.filter(a => a.lvl === "info")];
@@ -1471,22 +1481,23 @@ $("btnCopy").onclick = async () => {
 function resetForm() {
   document.querySelectorAll("#form input[type=checkbox]").forEach(el => el.checked = el.id === "menConj");
   document.querySelectorAll("#form input[type=number], #form input[type=month]").forEach(el => el.value = "");
-  $("bm").value = "1"; $("dtp").value = "ajour"; $("ror").value = "inconnu"; $("hepa").value = "0"; $("hepb").value = "inconnu";
+  $("bm").value = "1"; $("dtp").value = "inconnu"; $("ror").value = "inconnu"; $("hepa").value = "0"; $("hepb").value = "inconnu";
   ["je", "tbe", "dengueV", "mpoxV"].forEach(id => $(id).value = "0");
   $("departure").value = addDays(isoToday(), 30); $("cd4row").hidden = true;
   stops = [newStop("sejour")];
 }
-$("btnReset").onclick = () => { resetForm(); $("exampleBanner").hidden = true; renderStops(); update(); window.scrollTo(0, 0); };
+$("btnReset").onclick = () => { resetForm(); $("exampleBanner").hidden = true; $("btnExample").hidden = false; renderStops(); update(); window.scrollTo(0, 0); };
+$("btnExample").onclick = () => { loadExample(); $("exampleBanner").hidden = false; $("btnExample").hidden = true; renderStops(); update(); };
 
 function loadExample() {
   resetForm();
   $("bm").value = "3"; $("by").value = "1985";
   $("departure").value = addDays(isoToday(), 35);
-  $("ror").value = "2"; $("polioLast").value = "2019-06"; $("hepb").value = "3";
+  $("dtp").value = "ajour"; $("ror").value = "2"; $("polioLast").value = "2019-06"; $("hepb").value = "3";
   $("rural").checked = true; $("animals").checked = true;
   stops = [Object.assign(newStop("sejour"), { c: "KE", days: 10, fjZone: "oui", polio: "none" }), Object.assign(newStop("sejour"), { c: "TZ", days: 12, polio: "none" })];
 }
-loadExample(); renderStops(); update();
+resetForm(); renderStops(); update();
 setTimeout(() => document.body.classList.remove("intro"), 1400);
 
 </script>
