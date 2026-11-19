@@ -80,6 +80,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .strip { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; padding: 8px 24px; max-width: 1500px; margin: 0 auto; font-size: 13px; color: var(--muted); }
 .strip b { color: var(--ink); }
 .strip .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); display: inline-block; margin-right: 6px; }
+.linkbtn { border: 0; background: none; padding: 0; color: var(--accent); text-decoration: underline; cursor: pointer; font-size: 13px; }
 .strip-bar { border-bottom: 1px solid var(--line); background: var(--sheet); }
 
 /* ---------- Mise en page ---------- */
@@ -102,7 +103,7 @@ label { display: inline-flex; gap: 6px; align-items: center; }
 .lab { font-size: 11.5px; color: var(--muted); display: block; margin-bottom: 3px; text-transform: uppercase; letter-spacing: .05em; }
 .field { display: grid; }
 .out { font-family: var(--font-display); font-weight: 700; font-size: 22px; line-height: 1.2; font-variant-numeric: tabular-nums; }
-input[type=number], input[type=date], input[type=month], select { border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; background: var(--paper); min-width: 0; }
+input[type=number], input[type=date], input[type=month], input[type=text], select { border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; background: var(--paper); min-width: 0; }
 input[type=number] { width: 86px; }
 .sublegend { display: flex; align-items: center; gap: 10px; font-family: var(--font-mono); font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-top: 4px; }
 .sublegend::after { content: ""; flex: 1; height: 1px; background: var(--line); }
@@ -217,6 +218,47 @@ input[type=number] { width: 86px; }
 .foot ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
 .jump { display: none; position: fixed; right: 14px; bottom: 14px; z-index: 5; background: var(--cover-ink); color: var(--cover); border-radius: 999px; padding: 9px 16px; font-weight: 700; text-decoration: none; box-shadow: 0 4px 14px rgba(0,0,0,.25); }
 @media (max-width: 1000px) { .jump { display: inline-block; } }
+
+/* ---------- Onglets et conseils ---------- */
+.tabs { display: flex; gap: 4px; border-bottom: 2px solid var(--ink); }
+.tabs button { border: 1px solid var(--line); border-bottom: 0; background: var(--paper); border-radius: 8px 8px 0 0; padding: 9px 16px; font-family: var(--font-display); font-weight: 700; font-size: 17px; text-transform: uppercase; letter-spacing: .02em; cursor: pointer; color: var(--muted); margin-bottom: -2px; }
+.tabs button[aria-selected="true"] { background: var(--sheet); color: var(--ink); border-color: var(--ink); border-bottom: 2px solid var(--sheet); }
+@media (max-width: 520px) { .tabs button { font-size: 14.5px; padding: 8px 9px; } }
+.tcount { font-family: var(--font-body); font-size: 12px; font-weight: 700; background: var(--cover); color: var(--cover-ink); border-radius: 999px; padding: 1px 7px; margin-left: 4px; vertical-align: 2px; }
+.panel { display: grid; gap: 14px; }
+.toc { display: flex; flex-wrap: wrap; gap: 6px; }
+.toc button { border: 1px solid var(--line); background: var(--sheet); border-radius: 999px; padding: 4px 11px; font-size: 12.5px; cursor: pointer; }
+.toc button:hover { border-color: var(--accent); }
+.toc button.lv-crit { border-color: var(--s-ci); color: var(--s-ci); font-weight: 700; }
+.toc button.lv-high { border-color: var(--s-disc); color: var(--s-disc); font-weight: 700; }
+.advice { display: grid; gap: 12px; }
+.adv { background: var(--sheet); border: 1px solid var(--line); border-radius: 10px; padding: 13px 15px; display: grid; gap: 8px; border-top: 4px solid var(--line); scroll-margin-top: 12px; }
+.adv.lv-crit { border-top-color: var(--s-ci); } .adv.lv-high { border-top-color: var(--s-disc); }
+.adv-h { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.adv-h h3 { font-size: 21px; font-weight: 700; }
+.adv ul.items { margin: 0; padding: 0; list-style: none; display: grid; gap: 7px; }
+.adv ul.items > li { padding-left: 16px; position: relative; font-size: 13.8px; }
+.adv ul.items > li::before { content: ""; position: absolute; left: 2px; top: .62em; width: 6px; height: 6px; border-radius: 50%; background: var(--muted); }
+.adv ul.items > li.strong { font-weight: 700; }
+.adv ul.items > li.strong::before { background: var(--accent); }
+.adv ul.items ul { margin: 4px 0 0; padding-left: 18px; font-weight: 400; display: grid; gap: 3px; }
+.adv .r { font-family: var(--font-mono); font-size: 10.5px; color: var(--muted); font-weight: 400; margin-left: 4px; }
+.pal { display: grid; gap: 6px; }
+.pal details { border: 1px solid var(--line); border-radius: 8px; background: var(--paper); }
+.pal summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; padding: 7px 10px; }
+.pal summary::-webkit-details-marker { display: none; }
+.pal .cn { font-weight: 700; }
+.pal .cn small { font-weight: 400; color: var(--muted); }
+.pal .body { padding: 2px 12px 10px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 8px 18px; font-size: 13px; }
+.pal .body ul { margin: 0; padding-left: 16px; display: grid; gap: 3px; }
+.pal .body .note { color: var(--muted); font-size: 12px; }
+.lvl { font-size: 12px; font-weight: 700; border-radius: 999px; padding: 2px 10px; white-space: nowrap; }
+.lvl.eleve { color: var(--s-ci); background: var(--s-ci-bg); } .lvl.modere { color: var(--s-disc); background: var(--s-disc-bg); }
+.lvl.faible { color: var(--s-maj); background: var(--s-maj-bg); } .lvl.absent { color: var(--s-ok); background: var(--s-ok-bg); }
+.vh { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
+label.btn { cursor: pointer; display: inline-flex; align-items: center; }
+label.btn:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+body.dropping::after { content: "Déposez la fiche pour la rouvrir"; position: fixed; inset: 10px; border: 3px dashed var(--accent); border-radius: 14px; background: color-mix(in srgb, var(--paper) 85%, transparent); display: grid; place-items: center; font-family: var(--font-display); font-size: 28px; font-weight: 700; color: var(--accent); z-index: 20; pointer-events: none; }
 .toast { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--paper); padding: 8px 14px; border-radius: 6px; font-size: 13px; opacity: 0; transition: opacity .2s; pointer-events: none; }
 .toast.on { opacity: 1; }
 .copybox { width: 100%; min-height: 180px; font: 12px/1.45 var(--font-mono); border: 1px solid var(--line); border-radius: 8px; padding: 10px; background: var(--sheet); color: var(--ink); display: none; }
@@ -234,7 +276,8 @@ input[type=number] { width: 86px; }
     <div class="cover-side">
       <div class="actions">
         <button class="btn" id="btnReset" type="button">Nouveau patient</button>
-        <button class="btn primary" id="btnCopy" type="button">Copier la synthèse</button>
+        <label class="btn" for="fileOpen">Ouvrir une fiche<input type="file" id="fileOpen" accept=".html,.htm,.json,text/html,application/json" class="vh"></label>
+        <button class="btn primary" id="btnSave" type="button">Enregistrer la fiche</button>
       </div>
       <div class="src">HCSP · Recommandations sanitaires aux voyageurs 2026<br>établies au 12 juin 2026</div>
     </div>
@@ -242,7 +285,10 @@ input[type=number] { width: 86px; }
 </header>
 <div class="strip-bar">
   <div class="strip">
-    <span id="exampleBanner"><span class="dot"></span><b>Exemple fictif</b> · adulte de 41 ans, Kenya puis Tanzanie. Modifiez les champs ou cliquez sur « Nouveau patient ».</span>
+    <span id="exampleBanner" hidden><span class="dot"></span><b>Exemple fictif chargé</b> · adulte de 41 ans, Kenya puis Tanzanie. Cliquez sur « Nouveau patient » pour repartir de zéro.</span>
+    <span id="ficheBanner" hidden></span>
+    <button type="button" class="linkbtn" id="btnExample">Voir un exemple (Kenya puis Tanzanie)</button>
+    <button type="button" class="linkbtn" id="btnCopy">Copier la synthèse en texte</button>
     <span>Rien n'est enregistré ni transmis : calcul dans le navigateur. Ne saisissez pas d'identité.</span>
   </div>
 </div>
@@ -253,8 +299,12 @@ input[type=number] { width: 86px; }
       <summary><span class="num">1</span><span class="sec-t">Voyageur</span><span class="sec-sum" id="sum1"></span></summary>
       <div class="sec-body">
       <div class="row">
+        <div class="field" style="flex:1 1 220px"><span class="lab">Référence patient (initiales, n° de dossier)</span><input type="text" id="ref" maxlength="40" placeholder="ex. JD-0423" autocomplete="off"></div>
+      </div>
+      <div class="row">
         <div class="field"><span class="lab">Naissance (mois)</span><select id="bm"></select></div>
         <div class="field"><span class="lab">Naissance (année)</span><input type="number" id="by" min="1900" max="2030" step="1"></div>
+        <div class="field"><span class="lab">Poids (kg, facultatif)</span><input type="number" id="weight" min="1" max="250" step="1"></div>
         <div class="field"><span class="lab">Âge au départ</span><span id="ageOut" class="out">–</span></div>
       </div>
       <div class="checks">
@@ -307,6 +357,9 @@ input[type=number] { width: 86px; }
         <label><input type="checkbox" data-g="exp" id="careOfPatients"> Soins à des malades en épidémie</label>
         <label><input type="checkbox" data-g="exp" id="cholera"> Zone d'épidémie de choléra</label>
         <label><input type="checkbox" data-g="exp" id="closeContact"> Promiscuité, partage de literie</label>
+        <label><input type="checkbox" data-g="exp" id="diving"> Plongée avec bouteilles</label>
+        <label><input type="checkbox" data-g="exp" id="altitude"> Altitude &gt; 2 500 m</label>
+        <label><input type="checkbox" data-g="exp" id="cold"> Grand froid</label>
       </div>
       <div class="sublegend"><span>Exposition sexuelle (§ 9.1, § 1.13)</span></div>
       <div class="checks">
@@ -343,6 +396,10 @@ input[type=number] { width: 86px; }
         <label><input type="checkbox" id="complement"> Déficit en complément / properdine, anti-complément</label>
         <label><input type="checkbox" id="antiIFN"> Auto-Ac anti-interféron connus</label>
         <label><input type="checkbox" id="fluTarget"> Autre motif de vaccination grippale (calendrier)</label>
+        <label><input type="checkbox" id="neuroPsy"> Antécédent de convulsions ou trouble psychiatrique</label>
+        <label><input type="checkbox" id="avk"> Traitement par anti-vitamine K</label>
+        <label><input type="checkbox" id="vte"> Facteur de risque de thrombose (antécédent, œstroprogestatifs, obésité…)</label>
+        <label><input type="checkbox" id="narcotics"> Médicament stupéfiant ou assimilé</label>
       </div>
       <div class="sublegend"><span>Immunodépression (tableau 4)</span></div>
       <div class="checks">
@@ -402,9 +459,19 @@ input[type=number] { width: 86px; }
 
   <section class="results" id="results" aria-live="polite">
     <div class="board" id="summary"></div>
+    <div class="tabs" role="tablist" aria-label="Résultats">
+      <button type="button" role="tab" id="tabVacc" aria-selected="true" aria-controls="panelVacc">Vaccinations <span class="tcount" id="tcVacc"></span></button>
+      <button type="button" role="tab" id="tabAdv" aria-selected="false" aria-controls="panelAdv">Conseils de voyage <span class="tcount" id="tcAdv"></span></button>
+    </div>
+    <div id="panelVacc" role="tabpanel" aria-labelledby="tabVacc" class="panel">
     <div class="plan" id="timeline"></div>
     <div class="alerts" id="alerts"></div>
     <div id="groups" style="display:grid;gap:16px"></div>
+    </div>
+    <div id="panelAdv" role="tabpanel" aria-labelledby="tabAdv" class="panel" hidden>
+      <nav class="toc" id="advToc" aria-label="Sommaire des conseils"></nav>
+      <div id="advice" class="advice"></div>
+    </div>
     <textarea class="copybox" id="copybox" readonly aria-label="Synthèse à copier"></textarea>
   </section>
 </main>
@@ -436,7 +503,7 @@ input[type=number] { width: 86px; }
     <h2>Limites</h2>
     <ul>
       <li>Outil d'aide à la décision : il ne remplace ni l'examen clinique, ni le RCP des vaccins, ni l'avis d'un centre de vaccinations internationales.</li>
-      <li>Ne couvre pas la chimioprophylaxie du paludisme (annexe 4) ni les mesures non vaccinales.</li>
+      <li>Paludisme : situation et recommandations reprises du tableau 16 (annexe 4) ; les cartes de risque CEMV-HCSP (figures 21 à 48) ne sont pas reproduites et restent à consulter pour les séjours non conventionnels.</li>
       <li>Les règles reflètent le document du 12 juin 2026 ; toute nouvelle édition impose une mise à jour.</li>
       <li>Régions de l'Europe selon le géoschéma de l'ONU pour l'application des termes « Europe de l'Est / du Sud » du document.</li>
     </ul>
@@ -449,7 +516,9 @@ input[type=number] { width: 86px; }
 /*__COUNTRIES__*/
 /*__STATIC__*/
 /*__ENGINE__*/
+/*__ADVICE__*/
 /*__UI__*/
+/*__FICHE__*/
 </script>
 </body>
 </html>

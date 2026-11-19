@@ -110,6 +110,7 @@ function collect() {
     today: isoToday(),
     birth: { y: Number($("by").value) || null, m: Number($("bm").value) },
     pregnant: $("pregnant").checked, pregPlan: $("pregPlan").checked, breastfeeding: $("breastfeeding").checked, infantUnder6m: $("infantUnder6m").checked,
+    weight: $("weight").value, neuroPsy: $("neuroPsy").checked, avk: $("avk").checked, vte: $("vte").checked, narcotics: $("narcotics").checked,
     arthralgia: $("arthralgia").checked, complement: $("complement").checked, antiIFN: $("antiIFN").checked, fluTarget: $("fluTarget").checked, smallpox1980: $("smallpox1980").checked,
     immuno: im, comorb: grp("comorb"), hist: grp("hist"), meds: grp("meds"),
     vacc: {
@@ -209,6 +210,15 @@ function update() {
     ${flags ? `<div class="flags">${flags}</div>` : ""}
     <div class="sbar" role="img" aria-label="Répartition des statuts">${order.filter(s => counts[s]).map(s => `<span class="c-${s}" style="flex:${counts[s]}"></span>`).join("")}</div>
     <div class="legend">${order.filter(s => counts[s]).map(s => `<span><i class="c-${s}"></i>${ST_LABEL[s]} <b>${counts[s]}</b></span>`).join("")}</div>`;
+  if (!nStops) {
+    $("summary").innerHTML = `<div class="empty"><b>Nouveau patient</b><br>Renseignez le voyageur puis ajoutez au moins une étape à l'itinéraire : les recommandations s'afficheront ici.</div>`;
+    $("timeline").hidden = true; $("alerts").innerHTML = ""; $("groups").innerHTML = "";
+    $("jump").innerHTML = "Voir le plan";
+    $("sum1").textContent = P.ageM == null ? "à renseigner" : ageText(P.ageM);
+    $("sum2").textContent = "itinéraire à saisir"; $("sum3").textContent = ""; $("sum4").textContent = "";
+    $("tcVacc").textContent = ""; renderAdvice(inp);
+    return;
+  }
   const tl = timelineHtml(r, inp.trip.departure);
   $("timeline").innerHTML = tl; $("timeline").hidden = !tl;
   const al = [...r.alerts.filter(a => a.lvl === "crit"), ...r.alerts.filter(a => a.lvl === "warn"), ...r.alerts.filter(a => a.lvl === "info")];
@@ -218,6 +228,8 @@ function update() {
   const rest = vis.filter(i => ["NR", "INFO"].includes(i.status));
   if (rest.length) h += `<details class="collapsed-group"><summary>Non recommandé ou pour information (${rest.length})</summary><div class="cards">${rest.map(i => card(i, P.daysToDep)).join("")}</div></details>`;
   $("groups").innerHTML = h;
+  $("tcVacc").textContent = (counts.OBL || 0) + (counts.REC || 0) + (counts.MAJ || 0) || "";
+  renderAdvice(inp);
   $("jump").innerHTML = `Voir le plan <b>${(counts.OBL || 0) + (counts.REC || 0) + (counts.MAJ || 0)}</b> à faire${counts.CI ? ` · <b>${counts.CI}</b> CI` : ""}`;
   // résumés des sections
   $("sum1").textContent = [ageText(P.ageM), inp.pregnant ? "grossesse" : "", inp.breastfeeding ? "allaitement" : ""].filter(Boolean).join(" · ");
@@ -226,6 +238,39 @@ function update() {
   $("sum3").textContent = nT ? `${nT} élément${nT > 1 ? "s" : ""} coché${nT > 1 ? "s" : ""}` : "aucun facteur";
   $("sum4").textContent = $("dtp").value === "ajour" ? "dTP à jour" : "dTP à vérifier";
 }
+
+
+let lastAdv = null;
+const PL = { eleve: "Risque élevé", modere: "Risque modéré", faible: "Risque faible", absent: "Pas de transmission" };
+function renderAdvice(inp) {
+  const a = advise(inp); lastAdv = a;
+  const secs = a.sections;
+  $("tcAdv").textContent = secs.length || "";
+  if (!secs.length) { $("advToc").innerHTML = ""; $("advice").innerHTML = '<div class="empty">Ajoutez une étape à l\'itinéraire pour afficher les conseils liés aux zones visitées.</div>'; return; }
+  $("advToc").innerHTML = secs.map(s => `<button type="button" data-sec="${s.id}" class="lv-${s.lvl}">${esc(s.title)}</button>`).join("");
+  $("advice").innerHTML = secs.map(s => {
+    let pal = "";
+    if (s.id === "paludisme" && a.malaria) {
+      pal = `<div class="pal">${a.malaria.stops.map(x => `<details><summary><span class="cn">${esc(x.n)} ${x.p ? `<small>· tableau 16, p. ${x.p}</small>` : "<small>· non listé au tableau 16</small>"}</span><span class="lvl ${x.lvl}">${PL[x.lvl]}</span></summary>
+        <div class="body">${x.listed ? `<div><b>Situation</b><ul>${x.s.map(l => `<li>${esc(l).replace(/^(Risque (?:élevé|modéré|faible)|Aucun risque)/, "<b>$1</b>")}</li>`).join("")}</ul></div><div><b>Recommandations</b><ul>${x.r.map(l => /^Voir /.test(l) ? `<li class="note">${esc(l)} (cartes du document HCSP)</li>` : `<li>${esc(l)}</li>`).join("") || "<li>Aucune mesure spécifique au paludisme.</li>"}</ul></div>` : "<div>Pays non listé au tableau 16 : pas de transmission connue.</div>"}</div></details>`).join("")}</div>`;
+    }
+    return `<section class="adv lv-${s.lvl}" id="adv-${s.id}">
+      <div class="adv-h"><h3>${esc(s.title)}</h3>${s.badge ? `<span class="lvl ${a.malaria ? a.malaria.max : ""}">${esc(s.badge)}</span>` : ""}</div>
+      ${pal}
+      <ul class="items">${s.items.map(i => `<li class="${i.strong ? "strong" : ""}">${esc(i.t)}${i.ref ? ` <span class="r">${esc(i.ref)}</span>` : ""}${i.sub && i.sub.length ? `<ul>${i.sub.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}</li>`).join("")}</ul>
+    </section>`;
+  }).join("");
+}
+$("advToc").addEventListener("click", (e) => { const b = e.target.closest("button[data-sec]"); if (b) document.getElementById("adv-" + b.dataset.sec).scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }); });
+function setTab(which) {
+  const v = which === "vacc";
+  $("tabVacc").setAttribute("aria-selected", v); $("tabAdv").setAttribute("aria-selected", !v);
+  $("panelVacc").hidden = !v; $("panelAdv").hidden = v;
+}
+$("tabVacc").onclick = () => setTab("vacc");
+$("tabAdv").onclick = () => setTab("adv");
+$("tabVacc").addEventListener("keydown", (e) => { if (e.key === "ArrowRight") { setTab("adv"); $("tabAdv").focus(); } });
+$("tabAdv").addEventListener("keydown", (e) => { if (e.key === "ArrowLeft") { setTab("vacc"); $("tabVacc").focus(); } });
 
 function summaryText() {
   const { inp, r } = last; const P = r.profile;
@@ -241,6 +286,11 @@ function summaryText() {
     its.forEach(i => { L.push(`- ${i.name}${i.product ? " (" + i.product + ")" : ""} : ${i.reasons[0] || ""}`); if (["OBL", "REC"].includes(s) && i.schema[0]) L.push(`  Schéma : ${i.schema[0]}`); if (i.ciReasons) L.push(`  CI : ${i.ciReasons.join(" ; ")}`); });
   });
   if (r.warnings.length) { L.push(""); r.warnings.forEach(w => L.push("Délai : " + w.t)); }
+  if (lastAdv && lastAdv.sections.length) {
+    L.push(""); L.push("CONSEILS DE VOYAGE");
+    if (lastAdv.malaria) L.push("Paludisme : " + lastAdv.malaria.stops.map(x => `${x.n} ${PL[x.lvl].toLowerCase()}`).join(" ; ") + " – chimioprophylaxie : " + ({ oui: "indiquée", non: "non indiquée", discuter: "à discuter / avis spécialisé" })[lastAdv.malaria.cpap]);
+    lastAdv.sections.forEach(s => { const st = s.items.filter(i => i.strong); if (st.length) { L.push(`- ${s.title} :`); st.forEach(i => L.push(`  · ${i.t}`)); } });
+  }
   L.push(""); L.push("Proposition à valider par le praticien. Vérifier les données épidémiologiques et les conditions d'entrée en vigueur.");
   return L.join("\n");
 }
@@ -253,21 +303,22 @@ $("btnCopy").onclick = async () => {
 
 function resetForm() {
   document.querySelectorAll("#form input[type=checkbox]").forEach(el => el.checked = el.id === "menConj");
-  document.querySelectorAll("#form input[type=number], #form input[type=month]").forEach(el => el.value = "");
-  $("bm").value = "1"; $("dtp").value = "ajour"; $("ror").value = "inconnu"; $("hepa").value = "0"; $("hepb").value = "inconnu";
+  document.querySelectorAll("#form input[type=number], #form input[type=month], #form input[type=text]").forEach(el => el.value = "");
+  $("bm").value = "1"; $("dtp").value = "inconnu"; $("ror").value = "inconnu"; $("hepa").value = "0"; $("hepb").value = "inconnu";
   ["je", "tbe", "dengueV", "mpoxV"].forEach(id => $(id).value = "0");
   $("departure").value = addDays(isoToday(), 30); $("cd4row").hidden = true;
   stops = [newStop("sejour")];
 }
-$("btnReset").onclick = () => { resetForm(); $("exampleBanner").hidden = true; renderStops(); update(); window.scrollTo(0, 0); };
+$("btnReset").onclick = () => { resetForm(); $("exampleBanner").hidden = true; $("ficheBanner").hidden = true; $("btnExample").hidden = false; renderStops(); update(); window.scrollTo(0, 0); };
+$("btnExample").onclick = () => { loadExample(); $("ficheBanner").hidden = true; $("exampleBanner").hidden = false; $("btnExample").hidden = true; renderStops(); update(); };
 
 function loadExample() {
   resetForm();
   $("bm").value = "3"; $("by").value = "1985";
   $("departure").value = addDays(isoToday(), 35);
-  $("ror").value = "2"; $("polioLast").value = "2019-06"; $("hepb").value = "3";
+  $("dtp").value = "ajour"; $("ror").value = "2"; $("polioLast").value = "2019-06"; $("hepb").value = "3";
   $("rural").checked = true; $("animals").checked = true;
   stops = [Object.assign(newStop("sejour"), { c: "KE", days: 10, fjZone: "oui", polio: "none" }), Object.assign(newStop("sejour"), { c: "TZ", days: 12, polio: "none" })];
 }
-loadExample(); renderStops(); update();
+resetForm(); renderStops(); update();
 setTimeout(() => document.body.classList.remove("intro"), 1400);
