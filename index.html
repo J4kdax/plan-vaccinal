@@ -54,6 +54,9 @@
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html, body { margin: 0; }
+/* Réserve la place de la barre de défilement : la page ne se décale plus quand une section se déplie */
+html { scrollbar-gutter: stable; }
+@supports not (scrollbar-gutter: stable) { html { overflow-y: scroll; } }
 body { background: var(--paper); color: var(--ink); font: 14.5px/1.5 var(--font-body); }
 h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; letter-spacing: 0.005em; }
 a { color: var(--accent); }
