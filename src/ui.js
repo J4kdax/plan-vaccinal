@@ -216,7 +216,7 @@ function update() {
     $("jump").innerHTML = "Voir le plan";
     $("sum1").textContent = P.ageM == null ? "à renseigner" : ageText(P.ageM);
     $("sum2").textContent = "itinéraire à saisir"; $("sum3").textContent = ""; $("sum4").textContent = "";
-    $("tcVacc").textContent = ""; renderAdvice(inp);
+    $("tcVacc").textContent = "Itinéraire à saisir"; renderAdvice(inp);
     return;
   }
   const tl = timelineHtml(r, inp.trip.departure);
@@ -228,7 +228,8 @@ function update() {
   const rest = vis.filter(i => ["NR", "INFO"].includes(i.status));
   if (rest.length) h += `<details class="collapsed-group"><summary>Non recommandé ou pour information (${rest.length})</summary><div class="cards">${rest.map(i => card(i, P.daysToDep)).join("")}</div></details>`;
   $("groups").innerHTML = h;
-  $("tcVacc").textContent = (counts.OBL || 0) + (counts.REC || 0) + (counts.MAJ || 0) || "";
+  const todo = (counts.OBL || 0) + (counts.REC || 0) + (counts.MAJ || 0);
+  $("tcVacc").textContent = [todo ? `${todo} à faire` : "Rien à faire", counts.CI ? `${counts.CI} contre-indiqué${counts.CI > 1 ? "s" : ""}` : null].filter(Boolean).join(" · ");
   renderAdvice(inp);
   $("jump").innerHTML = `Voir le plan <b>${(counts.OBL || 0) + (counts.REC || 0) + (counts.MAJ || 0)}</b> à faire${counts.CI ? ` · <b>${counts.CI}</b> CI` : ""}`;
   // résumés des sections
@@ -245,7 +246,7 @@ const PL = { eleve: "Risque élevé", modere: "Risque modéré", faible: "Risque
 function renderAdvice(inp) {
   const a = advise(inp); lastAdv = a;
   const secs = a.sections;
-  $("tcAdv").textContent = secs.length || "";
+  $("tcAdv").textContent = secs.length ? [`${secs.length} rubriques`, a.malaria ? `paludisme : ${PL[a.malaria.max].toLowerCase()}` : null].filter(Boolean).join(" · ") : "Itinéraire à saisir";
   if (!secs.length) { $("advToc").innerHTML = ""; $("advice").innerHTML = '<div class="empty">Ajoutez une étape à l\'itinéraire pour afficher les conseils liés aux zones visitées.</div>'; return; }
   $("advToc").innerHTML = secs.map(s => `<button type="button" data-sec="${s.id}" class="lv-${s.lvl}">${esc(s.title)}</button>`).join("");
   $("advice").innerHTML = secs.map(s => {

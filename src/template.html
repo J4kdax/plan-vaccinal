@@ -220,11 +220,17 @@ input[type=number] { width: 86px; }
 @media (max-width: 1000px) { .jump { display: inline-block; } }
 
 /* ---------- Onglets et conseils ---------- */
-.tabs { display: flex; gap: 4px; border-bottom: 2px solid var(--ink); }
-.tabs button { border: 1px solid var(--line); border-bottom: 0; background: var(--paper); border-radius: 8px 8px 0 0; padding: 9px 16px; font-family: var(--font-display); font-weight: 700; font-size: 17px; text-transform: uppercase; letter-spacing: .02em; cursor: pointer; color: var(--muted); margin-bottom: -2px; }
-.tabs button[aria-selected="true"] { background: var(--sheet); color: var(--ink); border-color: var(--ink); border-bottom: 2px solid var(--sheet); }
-@media (max-width: 520px) { .tabs button { font-size: 14.5px; padding: 8px 9px; } }
-.tcount { font-family: var(--font-body); font-size: 12px; font-weight: 700; background: var(--cover); color: var(--cover-ink); border-radius: 999px; padding: 1px 7px; margin-left: 4px; vertical-align: 2px; }
+.tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 5px; background: color-mix(in srgb, var(--line) 55%, var(--paper)); border-radius: 14px; }
+.tabs button { display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto; column-gap: 10px; align-items: center; text-align: left; border: 0; background: transparent; border-radius: 10px; padding: 9px 14px; cursor: pointer; color: var(--muted); transition: background .15s, color .15s, box-shadow .15s; }
+.tabs .ti { grid-row: 1 / span 2; width: 26px; height: 26px; padding: 5px; border-radius: 8px; background: color-mix(in srgb, var(--muted) 12%, transparent); box-sizing: content-box; }
+.tabs .tt { font-family: var(--font-display); font-weight: 700; font-size: 18px; line-height: 1.1; text-transform: uppercase; letter-spacing: .02em; }
+.tabs .ts { font-size: 12.5px; line-height: 1.3; min-height: 1em; }
+.tabs button:hover { color: var(--ink); background: color-mix(in srgb, var(--sheet) 55%, transparent); }
+.tabs button[aria-selected="true"] { background: var(--sheet); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 3px 10px rgba(0,0,0,.06); }
+.tabs button[aria-selected="true"] .ti { background: var(--cover); color: var(--cover-ink); }
+.tabs button[aria-selected="true"] .ts { color: var(--accent); font-weight: 700; }
+@media (max-width: 520px) { .tabs button { grid-template-columns: 1fr; padding: 8px 10px; } .tabs .ti { display: none; } .tabs .tt { font-size: 15.5px; } .tabs .ts { font-size: 11.5px; } }
+@media (prefers-reduced-motion: reduce) { .tabs button { transition: none; } }
 .panel { display: grid; gap: 14px; }
 .toc { display: flex; flex-wrap: wrap; gap: 6px; }
 .toc button { border: 1px solid var(--line); background: var(--sheet); border-radius: 999px; padding: 4px 11px; font-size: 12.5px; cursor: pointer; }
@@ -276,7 +282,7 @@ body.dropping::after { content: "Déposez la fiche pour la rouvrir"; position: f
     <div class="cover-side">
       <div class="actions">
         <button class="btn" id="btnReset" type="button">Nouveau patient</button>
-        <label class="btn" for="fileOpen">Ouvrir une fiche<input type="file" id="fileOpen" accept=".html,.htm,.json,text/html,application/json" class="vh"></label>
+        <label class="btn" for="fileOpen">Ouvrir une fiche<input type="file" id="fileOpen" accept=".xlsx,.html,.htm,.json" class="vh"></label>
         <button class="btn primary" id="btnSave" type="button">Enregistrer la fiche</button>
       </div>
       <div class="src">HCSP · Recommandations sanitaires aux voyageurs 2026<br>établies au 12 juin 2026</div>
@@ -295,7 +301,7 @@ body.dropping::after { content: "Déposez la fiche pour la rouvrir"; position: f
 
 <main class="wrap">
   <form class="form" id="form" autocomplete="off">
-    <details class="sec" open id="sec1">
+    <details class="sec" id="sec1">
       <summary><span class="num">1</span><span class="sec-t">Voyageur</span><span class="sec-sum" id="sum1"></span></summary>
       <div class="sec-body">
       <div class="row">
@@ -316,7 +322,7 @@ body.dropping::after { content: "Déposez la fiche pour la rouvrir"; position: f
       </div>
     </details>
 
-    <details class="sec" open id="sec2">
+    <details class="sec" id="sec2">
       <summary><span class="num">2</span><span class="sec-t">Voyage</span><span class="sec-sum" id="sum2"></span></summary>
       <div class="sec-body">
       <div class="row">
@@ -370,7 +376,7 @@ body.dropping::after { content: "Déposez la fiche pour la rouvrir"; position: f
       </div>
     </details>
 
-    <details class="sec" open id="sec3">
+    <details class="sec" id="sec3">
       <summary><span class="num">3</span><span class="sec-t">Terrain et antécédents</span><span class="sec-sum" id="sum3"></span></summary>
       <div class="sec-body">
       <div class="sublegend"><span>Comorbidités (tableau 1, chikungunya)</span></div>
@@ -432,7 +438,7 @@ body.dropping::after { content: "Déposez la fiche pour la rouvrir"; position: f
       </div>
     </details>
 
-    <details class="sec" open id="sec4">
+    <details class="sec" id="sec4">
       <summary><span class="num">4</span><span class="sec-t">Statut vaccinal</span><span class="sec-sum" id="sum4"></span></summary>
       <div class="sec-body">
       <div class="vtable">
@@ -460,8 +466,12 @@ body.dropping::after { content: "Déposez la fiche pour la rouvrir"; position: f
   <section class="results" id="results" aria-live="polite">
     <div class="board" id="summary"></div>
     <div class="tabs" role="tablist" aria-label="Résultats">
-      <button type="button" role="tab" id="tabVacc" aria-selected="true" aria-controls="panelVacc">Vaccinations <span class="tcount" id="tcVacc"></span></button>
-      <button type="button" role="tab" id="tabAdv" aria-selected="false" aria-controls="panelAdv">Conseils de voyage <span class="tcount" id="tcAdv"></span></button>
+      <button type="button" role="tab" id="tabVacc" aria-selected="true" aria-controls="panelVacc">
+        <svg class="ti" viewBox="0 0 24 24" aria-hidden="true"><path d="M17 3l4 4M19 5l-9.5 9.5M7 12l5 5M4 20l3.5-3.5M8.5 10.5l5 5 4-4-5-5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="tt">Vaccinations</span><span class="ts" id="tcVacc"></span></button>
+      <button type="button" role="tab" id="tabAdv" aria-selected="false" aria-controls="panelAdv">
+        <svg class="ti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M15.5 8.5l-2 5-5 2 2-5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+        <span class="tt">Conseils de voyage</span><span class="ts" id="tcAdv"></span></button>
     </div>
     <div id="panelVacc" role="tabpanel" aria-labelledby="tabVacc" class="panel">
     <div class="plan" id="timeline"></div>
@@ -512,6 +522,9 @@ body.dropping::after { content: "Déposez la fiche pour la rouvrir"; position: f
 <a class="jump" id="jump" href="#results">Voir le plan</a>
 <div class="toast" id="toast" role="status"></div>
 
+<script>
+/*__FFLATE__*/
+</script>
 <script>
 /*__COUNTRIES__*/
 /*__STATIC__*/

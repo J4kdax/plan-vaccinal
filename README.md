@@ -8,8 +8,12 @@ Toutes les règles proviennent du document du Haut Conseil de la santé publique
 
 ## Fiche patient
 
-- **Enregistrer la fiche** télécharge un fichier HTML nommé `fiche-voyageur_<référence>_consult-<AAAA-MM-JJ>_<pays>_depart-<AAAA-MM-JJ>.html` (pays en codes ISO, par exemple `KE-TZ`). Il s'ouvre dans n'importe quel navigateur comme une fiche lisible et imprimable (itinéraire, profil, statut vaccinal déclaré, vaccinations, conseils prioritaires) et contient aussi les données saisies.
-- **Ouvrir une fiche** (ou glisser-déposer le fichier sur la page) recharge toutes les saisies pour modifier la consultation. L'âge et les délais sont recalculés à la date du jour.
+- **Enregistrer la fiche** télécharge un classeur Excel nommé `fiche-voyageur_<référence>_consult-<AAAA-MM-JJ>_<pays>_depart-<AAAA-MM-JJ>.xlsx` (pays en codes ISO, par exemple `KE-TZ`). Il s'ouvre dans Excel, LibreOffice ou Numbers et comprend trois onglets :
+  - **Fiche** : synthèse lisible et imprimable (référence, itinéraire, profil, statut vaccinal déclaré, vaccinations, conseils prioritaires) ;
+  - **Données** : une ligne par champ du formulaire (identifiant, libellé, valeur) ;
+  - **Itinéraire** : une ligne par étape.
+- **Ouvrir une fiche** (ou glisser-déposer le fichier sur la page) recharge toutes les saisies pour modifier la consultation, y compris après un réenregistrement du classeur par Excel ou LibreOffice. L'âge et les délais sont recalculés à la date du jour. Les anciennes fiches .html restent lisibles.
+- Ne pas renommer les onglets ni modifier la colonne « Champ » de l'onglet Données.
 - La référence patient est libre : préférer des initiales ou un numéro de dossier. Le fichier contient des données de santé et relève du secret médical : il se conserve dans le dossier du patient.
 
 ## Confidentialité
@@ -37,7 +41,8 @@ src/
   engine.js           moteur de règles vaccinales (fonction pure evaluate)
   advice.js           moteur de conseils de voyage (fonction pure advise)
   ui.js               interface
-  fiche.js            enregistrement et réouverture des fiches patient
+  fiche.js            enregistrement et réouverture des fiches patient (.xlsx)
+  vendor/             fflate 0.8.2 (compression zip, licence MIT), intégré à la page
 tests/test.js         43 vérifications de cas cliniques (vaccins) + test sur tous les pays
 tests/test_advice.js  vérifications des conseils + test sur tous les pays
 tools/                scripts d'extraction des tableaux depuis le PDF du HCSP
