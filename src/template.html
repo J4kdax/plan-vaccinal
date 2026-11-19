@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plan vaccinal du voyageur</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Idée : le carnet jaune de vaccination internationale. Couverture ocre, pages papier,
+     statuts posés comme des tampons. Formulaire à gauche, décision à droite. */
+  --paper: #f5f2ea;
+  --sheet: #fffdf8;
+  --ink: #1b2a30;
+  --muted: #5c6a6e;
+  --line: #ddd6c6;
+  --cover: #e2bf4c;
+  --cover-ink: #2a2412;
+  --accent: #0b5f5a;
+  --accent-soft: #e0eeea;
+  --font-display: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --s-obl: #8a1f4f; --s-obl-bg: #f8e7ee;
+  --s-ci: #b42318; --s-ci-bg: #fce9e6;
+  --s-rec: #16683f; --s-rec-bg: #e2f2e8;
+  --s-maj: #1f58a3; --s-maj-bg: #e5edf9;
+  --s-disc: #93570a; --s-disc-bg: #f9eed8;
+  --s-ok: #46675d; --s-ok-bg: #e8eeeb;
+  --s-nr: #646b70; --s-nr-bg: #eceeee;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #121816; --sheet: #1a2220; --ink: #e8ebe4; --muted: #a2aea8; --line: #2f3a36;
+    --cover: #3b3218; --cover-ink: #f0d77a; --accent: #5cc4b8; --accent-soft: #173431;
+    --s-obl: #f09ac2; --s-obl-bg: #3a1a29; --s-ci: #ff8f86; --s-ci-bg: #3d1a16;
+    --s-rec: #7fd6a4; --s-rec-bg: #15301f; --s-maj: #93b9f0; --s-maj-bg: #18283f;
+    --s-disc: #f0be68; --s-disc-bg: #392a10; --s-ok: #a8c6bb; --s-ok-bg: #1e2b27;
+    --s-nr: #aab2b6; --s-nr-bg: #232b2a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #121816; --sheet: #1a2220; --ink: #e8ebe4; --muted: #a2aea8; --line: #2f3a36;
+  --cover: #3b3218; --cover-ink: #f0d77a; --accent: #5cc4b8; --accent-soft: #173431;
+  --s-obl: #f09ac2; --s-obl-bg: #3a1a29; --s-ci: #ff8f86; --s-ci-bg: #3d1a16;
+  --s-rec: #7fd6a4; --s-rec-bg: #15301f; --s-maj: #93b9f0; --s-maj-bg: #18283f;
+  --s-disc: #f0be68; --s-disc-bg: #392a10; --s-ok: #a8c6bb; --s-ok-bg: #1e2b27;
+  --s-nr: #aab2b6; --s-nr-bg: #232b2a;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body { background: var(--paper); color: var(--ink); font: 14.5px/1.5 var(--font-body); }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; letter-spacing: 0.005em; }
+a { color: var(--accent); }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ---------- Couverture ---------- */
+.cover { background: var(--cover); color: var(--cover-ink); position: relative; overflow: hidden;
+  background-image: repeating-linear-gradient(0deg, transparent 0 22px, color-mix(in srgb, var(--cover-ink) 6%, transparent) 22px 23px); }
+.cover-in { display: grid; grid-template-columns: 1fr auto; gap: 18px 32px; align-items: end; padding: 22px 24px 20px; max-width: 1500px; margin: 0 auto; }
+@media (max-width: 760px) { .cover-in { grid-template-columns: 1fr; } }
+.kicker { font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.12em; text-transform: uppercase; opacity: .8; }
+.cover h1 { font-size: clamp(34px, 5vw, 54px); line-height: .95; font-weight: 700; text-transform: uppercase; margin: 6px 0 10px; }
+.cover p { margin: 0; max-width: 62ch; font-size: 14px; }
+.cover-side { display: grid; gap: 10px; justify-items: end; }
+@media (max-width: 760px) { .cover-side { justify-items: start; } }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn { border: 1px solid var(--line); background: var(--sheet); border-radius: 6px; padding: 7px 13px; cursor: pointer; }
+.btn:hover { border-color: var(--accent); }
+.cover .btn { border-color: color-mix(in srgb, var(--cover-ink) 35%, transparent); background: color-mix(in srgb, var(--sheet) 70%, transparent); }
+.btn.primary, .cover .btn.primary { background: var(--cover-ink); border-color: var(--cover-ink); color: var(--cover); font-weight: 700; }
+.src { font-family: var(--font-mono); font-size: 11px; opacity: .85; text-align: right; }
+@media (max-width: 760px) { .src { text-align: left; } }
+.strip { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; padding: 8px 24px; max-width: 1500px; margin: 0 auto; font-size: 13px; color: var(--muted); }
+.strip b { color: var(--ink); }
+.strip .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); display: inline-block; margin-right: 6px; }
+.strip-bar { border-bottom: 1px solid var(--line); background: var(--sheet); }
+
+/* ---------- Mise en page ---------- */
+.wrap { display: grid; grid-template-columns: minmax(340px, 480px) 1fr; gap: 22px; padding: 18px 24px 40px; align-items: start; max-width: 1500px; margin: 0 auto; }
+@media (max-width: 1000px) { .wrap { grid-template-columns: 1fr; padding: 14px 16px 30px; } }
+
+/* ---------- Formulaire ---------- */
+.form { display: grid; gap: 12px; }
+.sec { background: var(--sheet); border: 1px solid var(--line); border-radius: 10px; }
+.sec > summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: 30px auto 1fr 14px; gap: 10px; align-items: center; padding: 11px 14px; }
+.sec > summary::-webkit-details-marker { display: none; }
+.sec > summary::after { content: ""; width: 8px; height: 8px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(45deg); justify-self: end; margin-top: -4px; }
+.sec[open] > summary::after { transform: rotate(-135deg); margin-top: 4px; }
+.num { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--ink); display: grid; place-items: center; font-family: var(--font-display); font-weight: 700; font-size: 15px; }
+.sec-t { font-family: var(--font-display); font-weight: 700; font-size: 19px; text-transform: uppercase; letter-spacing: .02em; }
+.sec-sum { font-size: 12.5px; color: var(--muted); text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sec-body { display: grid; gap: 11px; padding: 2px 14px 16px; border-top: 1px dashed var(--line); padding-top: 12px; }
+.row { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: end; }
+label { display: inline-flex; gap: 6px; align-items: center; }
+.lab { font-size: 11.5px; color: var(--muted); display: block; margin-bottom: 3px; text-transform: uppercase; letter-spacing: .05em; }
+.field { display: grid; }
+.out { font-family: var(--font-display); font-weight: 700; font-size: 22px; line-height: 1.2; font-variant-numeric: tabular-nums; }
+input[type=number], input[type=date], input[type=month], select { border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; background: var(--paper); min-width: 0; }
+input[type=number] { width: 86px; }
+.sublegend { display: flex; align-items: center; gap: 10px; font-family: var(--font-mono); font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-top: 4px; }
+.sublegend::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+/* cases à cocher en pastilles */
+.checks { display: flex; flex-wrap: wrap; gap: 6px; }
+.checks label { position: relative; border: 1px solid var(--line); border-radius: 999px; padding: 4px 11px 4px 26px; font-size: 13px; line-height: 1.35; cursor: pointer; background: var(--paper); transition: background .12s, border-color .12s; }
+.checks label::before { content: ""; position: absolute; left: 9px; top: 50%; width: 10px; height: 10px; margin-top: -5px; border-radius: 50%; border: 1.5px solid var(--muted); }
+.checks input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.checks label:hover { border-color: var(--accent); }
+.checks label:has(input:checked) { background: var(--accent-soft); border-color: var(--accent); color: var(--ink); font-weight: 700; }
+.checks label:has(input:checked)::before { background: var(--accent); border-color: var(--accent); box-shadow: inset 0 0 0 2px var(--accent-soft); }
+.checks label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+.vtable { display: grid; grid-template-columns: 1fr auto; gap: 7px 12px; align-items: center; font-size: 13.5px; }
+.vtable > span:nth-child(odd) { border-bottom: 1px dotted var(--line); padding-bottom: 5px; }
+.vtable .cell { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: flex-end; }
+.vtable .cell label { font-size: 12.5px; }
+.hint { font-size: 12.5px; color: var(--muted); }
+/* étapes */
+.stop { border: 1px solid var(--line); border-radius: 9px; padding: 10px 10px 10px 12px; display: grid; gap: 8px; background: var(--paper); position: relative; }
+.stop::before { content: ""; position: absolute; left: -1px; top: 12px; bottom: 12px; width: 3px; border-radius: 2px; background: var(--accent); }
+.stop.transit::before { background: repeating-linear-gradient(180deg, var(--muted) 0 4px, transparent 4px 8px); }
+.stop-head { display: grid; grid-template-columns: 30px 1fr auto; gap: 8px; align-items: center; }
+.stop-num { font-family: var(--font-display); font-weight: 700; font-size: 18px; color: var(--accent); }
+.stop-head select { width: 100%; font-weight: 700; }
+.stop-ctrl { display: flex; gap: 4px; }
+.icon { border: 1px solid var(--line); background: var(--sheet); border-radius: 6px; width: 28px; height: 28px; cursor: pointer; line-height: 1; }
+.icon:hover { border-color: var(--accent); }
+.ctx { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px 10px; font-size: 12.5px; }
+.ctx select { width: 100%; font-size: 12.5px; }
+.tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.tag { font-size: 11px; border-radius: 4px; padding: 1px 7px; background: var(--sheet); border: 1px solid var(--line); color: var(--muted); }
+.tag.fj { border-color: color-mix(in srgb, var(--s-obl) 50%, transparent); color: var(--s-obl); }
+
+/* ---------- Résultats ---------- */
+.results { display: grid; gap: 14px; min-width: 0; }
+.board { background: var(--sheet); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 14px; }
+.route { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 0; }
+.node { display: grid; gap: 1px; padding: 4px 10px; border: 1.5px solid var(--ink); border-radius: 6px; background: var(--sheet); min-width: 64px; }
+.node .cc { font-family: var(--font-display); font-weight: 700; font-size: 17px; line-height: 1; letter-spacing: .04em; }
+.node .nm { font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+.node.home { border-color: var(--muted); border-style: solid; color: var(--muted); }
+.node.transit { border-style: dashed; border-color: var(--muted); }
+.leg { width: 28px; height: 0; border-top: 2px dashed var(--muted); position: relative; }
+.leg::after { content: ""; position: absolute; right: -1px; top: -5px; border: 4px solid transparent; border-left: 6px solid var(--muted); }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
+.fact { border-left: 2px solid var(--line); padding-left: 10px; }
+.fact .k { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.fact .v { font-family: var(--font-display); font-weight: 700; font-size: 24px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.flags { display: flex; gap: 6px; flex-wrap: wrap; }
+.sbar { display: flex; height: 10px; border-radius: 999px; overflow: hidden; background: var(--line); gap: 2px; }
+.sbar span { display: block; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12.5px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+.legend b { font-variant-numeric: tabular-nums; }
+.c-OBL { background: var(--s-obl); } .c-CI { background: var(--s-ci); } .c-REC { background: var(--s-rec); } .c-MAJ { background: var(--s-maj); }
+.c-DISC { background: var(--s-disc); } .c-OK { background: var(--s-ok); } .c-NR { background: var(--s-nr); }
+/* calendrier avant départ */
+.plan { background: var(--sheet); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 10px; }
+.plan h2, .group > h2 { font-size: 19px; font-weight: 700; text-transform: uppercase; letter-spacing: .02em; display: flex; gap: 10px; align-items: center; }
+.plan .note { font-size: 12.5px; color: var(--muted); }
+.tl { display: grid; grid-template-columns: minmax(130px, 210px) 1fr; gap: 6px 12px; align-items: center; font-size: 13px; }
+.tl .name { line-height: 1.25; }
+.tl .date { font-family: var(--font-mono); font-size: 11px; color: var(--muted); display: block; }
+.track { position: relative; height: 22px; border-radius: 4px; background: var(--paper); }
+.gl { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--line); }
+.bar { position: absolute; top: 5px; height: 12px; border-radius: 3px; }
+.bar.OBL { background: var(--s-obl); } .bar.REC { background: var(--s-rec); }
+.bar .late { position: absolute; top: 0; bottom: 0; left: 0; border-radius: 3px 0 0 3px; background: repeating-linear-gradient(135deg, var(--s-ci) 0 4px, color-mix(in srgb, var(--s-ci) 45%, transparent) 4px 8px); }
+.mark { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--ink); }
+.axis { position: relative; height: 18px; font-family: var(--font-mono); font-size: 10.5px; color: var(--muted); }
+.axis span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.axis span.today { color: var(--ink); font-weight: 500; }
+/* alertes */
+.alerts { display: grid; gap: 6px; }
+.alert { display: grid; grid-template-columns: 18px 1fr; gap: 8px; align-items: start; background: var(--sheet); border: 1px solid var(--line); border-radius: 8px; padding: 8px 11px; font-size: 13.5px; }
+.alert svg { margin-top: 2px; }
+.alert.crit { border-color: var(--s-ci); background: var(--s-ci-bg); } .alert.crit svg { color: var(--s-ci); }
+.alert.warn svg { color: var(--s-disc); } .alert.info svg { color: var(--accent); }
+.ref { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+/* cartes */
+.group { display: grid; gap: 8px; }
+.count { font-family: var(--font-display); min-width: 26px; height: 26px; border-radius: 50%; display: inline-grid; place-items: center; color: var(--sheet); font-size: 15px; }
+.cards { display: grid; gap: 10px; }
+.card { background: var(--sheet); border: 1px solid var(--line); border-radius: 10px; padding: 13px 15px 11px; display: grid; gap: 7px; position: relative; }
+.card-h { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: start; }
+.card-h h3 { font-size: 21px; font-weight: 700; line-height: 1.1; }
+.card-h .prod { display: block; font-family: var(--font-body); font-size: 13px; font-weight: 700; color: var(--accent); margin-top: 2px; }
+.stamp { font-family: var(--font-display); font-weight: 700; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; padding: 3px 9px; border: 2px solid currentColor; border-radius: 5px; box-shadow: inset 0 0 0 1.5px var(--sheet), inset 0 0 0 3px currentColor; transform: rotate(-3deg); white-space: nowrap; background: var(--sheet); }
+.s-OBL .stamp { color: var(--s-obl); } .s-CI .stamp { color: var(--s-ci); } .s-REC .stamp { color: var(--s-rec); } .s-MAJ .stamp { color: var(--s-maj); }
+.s-DISC .stamp { color: var(--s-disc); } .s-OK .stamp { color: var(--s-ok); } .s-NR .stamp, .s-INFO .stamp { color: var(--s-nr); }
+.intro .stamp { animation: stamp .45s cubic-bezier(.2, 1.4, .4, 1) both; }
+@keyframes stamp { from { transform: rotate(-12deg) scale(1.6); opacity: 0; } to { transform: rotate(-3deg) scale(1); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .intro .stamp { animation: none; } .checks label { transition: none; } }
+.card ul { margin: 0; padding-left: 18px; display: grid; gap: 3px; }
+.card li::marker { color: var(--muted); }
+.card .ci { color: var(--s-ci); font-weight: 700; background: var(--s-ci-bg); border-radius: 6px; padding: 5px 9px; }
+.lead { font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); display: flex; gap: 6px; align-items: center; }
+.lead.late { color: var(--s-ci); font-weight: 500; }
+.card details summary { cursor: pointer; font-size: 13px; color: var(--accent); font-weight: 700; width: max-content; }
+.dgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px 18px; margin-top: 6px; }
+.blk { font-size: 13.5px; }
+.blk b { display: block; font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 500; margin-bottom: 3px; }
+.refs { display: flex; flex-wrap: wrap; gap: 4px; }
+.refs span { font-family: var(--font-mono); font-size: 10.5px; color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; }
+.card.s-NR, .card.s-INFO, .card.s-OK { background: color-mix(in srgb, var(--sheet) 60%, var(--paper)); }
+.collapsed-group > summary { cursor: pointer; font-family: var(--font-display); font-weight: 700; font-size: 17px; text-transform: uppercase; color: var(--muted); margin: 2px 0 8px; }
+.empty { border: 1.5px dashed var(--line); border-radius: 10px; padding: 22px; text-align: center; color: var(--muted); }
+/* pied */
+.foot { padding: 0 24px 34px; max-width: 1500px; margin: 0 auto; display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.foot section { border-top: 3px solid var(--ink); padding-top: 10px; font-size: 13px; }
+.foot h2 { font-size: 17px; text-transform: uppercase; margin-bottom: 6px; }
+.foot ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.jump { display: none; position: fixed; right: 14px; bottom: 14px; z-index: 5; background: var(--cover-ink); color: var(--cover); border-radius: 999px; padding: 9px 16px; font-weight: 700; text-decoration: none; box-shadow: 0 4px 14px rgba(0,0,0,.25); }
+@media (max-width: 1000px) { .jump { display: inline-block; } }
+.toast { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--paper); padding: 8px 14px; border-radius: 6px; font-size: 13px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+.toast.on { opacity: 1; }
+.copybox { width: 100%; min-height: 180px; font: 12px/1.45 var(--font-mono); border: 1px solid var(--line); border-radius: 8px; padding: 10px; background: var(--sheet); color: var(--ink); display: none; }
+.copybox.on { display: block; }
+</style>
+</head>
+<body class="intro">
+<header class="cover">
+  <div class="cover-in">
+    <div>
+      <div class="kicker">Consultation voyageur · aide à la décision</div>
+      <h1>Plan vaccinal<br>du voyageur</h1>
+      <p>Chaque proposition est tirée, règle par règle, des recommandations du HCSP et cite sa page. La décision reste celle du praticien.</p>
+    </div>
+    <div class="cover-side">
+      <div class="actions">
+        <button class="btn" id="btnReset" type="button">Nouveau patient</button>
+        <button class="btn primary" id="btnCopy" type="button">Copier la synthèse</button>
+      </div>
+      <div class="src">HCSP · Recommandations sanitaires aux voyageurs 2026<br>établies au 12 juin 2026</div>
+    </div>
+  </div>
+</header>
+<div class="strip-bar">
+  <div class="strip">
+    <span id="exampleBanner"><span class="dot"></span><b>Exemple fictif</b> · adulte de 41 ans, Kenya puis Tanzanie. Modifiez les champs ou cliquez sur « Nouveau patient ».</span>
+    <span>Rien n'est enregistré ni transmis : calcul dans le navigateur. Ne saisissez pas d'identité.</span>
+  </div>
+</div>
+
+<main class="wrap">
+  <form class="form" id="form" autocomplete="off">
+    <details class="sec" open id="sec1">
+      <summary><span class="num">1</span><span class="sec-t">Voyageur</span><span class="sec-sum" id="sum1"></span></summary>
+      <div class="sec-body">
+      <div class="row">
+        <div class="field"><span class="lab">Naissance (mois)</span><select id="bm"></select></div>
+        <div class="field"><span class="lab">Naissance (année)</span><input type="number" id="by" min="1900" max="2030" step="1"></div>
+        <div class="field"><span class="lab">Âge au départ</span><span id="ageOut" class="out">–</span></div>
+      </div>
+      <div class="checks">
+        <label><input type="checkbox" id="pregnant"> Grossesse en cours</label>
+        <label><input type="checkbox" id="pregPlan"> Projet de grossesse</label>
+        <label><input type="checkbox" id="breastfeeding"> Allaitement</label>
+        <label><input type="checkbox" id="infantUnder6m"> … d'un nourrisson de moins de 6 mois</label>
+      </div>
+      </div>
+    </details>
+
+    <details class="sec" open id="sec2">
+      <summary><span class="num">2</span><span class="sec-t">Voyage</span><span class="sec-sum" id="sum2"></span></summary>
+      <div class="sec-body">
+      <div class="row">
+        <div class="field"><span class="lab">Date de départ</span><input type="date" id="departure"></div>
+        <div class="field"><span class="lab">Jours avant le départ</span><span id="daysOut" class="out">–</span></div>
+      </div>
+      <div class="sublegend"><span>Itinéraire, dans l'ordre (transits compris)</span></div>
+      <div id="stops" style="display:grid;gap:8px"></div>
+      <div class="row"><button type="button" class="btn" id="addStop">Ajouter une étape</button><button type="button" class="btn" id="addTransit">Ajouter un transit</button></div>
+      <div class="hint">Le contexte épidémiologique de chaque étape (dengue, chikungunya, polio, mpox) évolue : il se renseigne d'après les sources de veille citées en bas de page.</div>
+      <div class="sublegend"><span>Type de séjour</span></div>
+      <div class="checks">
+        <label><input type="checkbox" data-g="type" id="expat"> Expatriation</label>
+        <label><input type="checkbox" data-g="type" id="repeated"> Séjours répétés / fréquents</label>
+        <label><input type="checkbox" data-g="type" id="vfr"> Visite à la famille (VFR)</label>
+        <label><input type="checkbox" data-g="type" id="health"> Professionnel de santé sur place</label>
+        <label><input type="checkbox" data-g="type" id="humanitarian"> Humanitaire</label>
+        <label><input type="checkbox" data-g="type" id="refugees"> Travail auprès de réfugiés</label>
+        <label><input type="checkbox" data-g="type" id="onu"> Mandat ONU</label>
+        <label><input type="checkbox" data-g="type" id="hadj"> Pèlerinage à La Mecque (Hadj, Omra)</label>
+        <label><input type="checkbox" data-g="type" id="mass"> Grand rassemblement</label>
+        <label><input type="checkbox" data-g="type" id="group"> Voyage de groupe, croisière</label>
+        <label><input type="checkbox" data-g="type" id="crew"> Personnel navigant, guide, accompagnateur</label>
+      </div>
+      <div class="sublegend"><span>Conditions et activités</span></div>
+      <div class="checks">
+        <label><input type="checkbox" data-g="exp" id="rural"> Zone rurale, nuitées hors villes</label>
+        <label><input type="checkbox" data-g="exp" id="ricePigs"> Rizières, élevages porcins (EJ)</label>
+        <label><input type="checkbox" data-g="exp" id="rainy"> Saison des pluies (EJ)</label>
+        <label><input type="checkbox" data-g="exp" id="tbeOutdoor"> Forêt / plein air, printemps-automne, ≤ 1 500 m (tiques)</label>
+        <label><input type="checkbox" data-g="exp" id="rawMilk"> Lait ou laitages non pasteurisés</label>
+        <label><input type="checkbox" data-g="exp" id="animals"> Séjour aventureux, contacts animaux, camping</label>
+        <label><input type="checkbox" data-g="exp" id="caving"> Spéléologie</label>
+        <label><input type="checkbox" data-g="exp" id="isolated"> Isolement (soins rapides impossibles)</label>
+        <label><input type="checkbox" data-g="exp" id="freshwater"> Activités régulières en eau douce</label>
+        <label><input type="checkbox" data-g="exp" id="poorHygiene"> Conditions d'hygiène précaires</label>
+        <label><input type="checkbox" data-g="exp" id="meningBelt"> Ceinture de la méningite en saison sèche, contact étroit et prolongé</label>
+        <label><input type="checkbox" data-g="exp" id="careOfPatients"> Soins à des malades en épidémie</label>
+        <label><input type="checkbox" data-g="exp" id="cholera"> Zone d'épidémie de choléra</label>
+        <label><input type="checkbox" data-g="exp" id="closeContact"> Promiscuité, partage de literie</label>
+      </div>
+      <div class="sublegend"><span>Exposition sexuelle (§ 9.1, § 1.13)</span></div>
+      <div class="checks">
+        <label><input type="checkbox" data-g="exp" id="sti"> Sexualité exposant à un risque d'IST</label>
+        <label><input type="checkbox" data-g="exp" id="orAnal"> Rapports oro-anaux</label>
+        <label><input type="checkbox" data-g="exp" id="mpoxSex"> Très haut risque mpox (indications nationales)</label>
+      </div>
+      </div>
+    </details>
+
+    <details class="sec" open id="sec3">
+      <summary><span class="num">3</span><span class="sec-t">Terrain et antécédents</span><span class="sec-sum" id="sum3"></span></summary>
+      <div class="sec-body">
+      <div class="sublegend"><span>Comorbidités (tableau 1, chikungunya)</span></div>
+      <div class="checks">
+        <label><input type="checkbox" data-g="comorb" id="hta"> Hypertension artérielle</label>
+        <label><input type="checkbox" data-g="comorb" id="diabete"> Diabète</label>
+        <label><input type="checkbox" data-g="comorb" id="cardio"> Maladie cardiovasculaire</label>
+        <label><input type="checkbox" data-g="comorb" id="resp"> Maladie respiratoire chronique</label>
+        <label><input type="checkbox" data-g="comorb" id="neurovasc"> Maladie neurovasculaire</label>
+        <label><input type="checkbox" data-g="comorb" id="alcool"> Éthylisme chronique</label>
+      </div>
+      <div class="sublegend"><span>Autres terrains</span></div>
+      <div class="checks">
+        <label><input type="checkbox" data-g="comorb" id="hepato"> Maladie chronique du foie</label>
+        <label><input type="checkbox" data-g="comorb" id="muco"> Mucoviscidose</label>
+        <label><input type="checkbox" data-g="comorb" id="irc"> Insuffisance rénale chronique</label>
+        <label><input type="checkbox" data-g="comorb" id="cancer"> Cancer</label>
+        <label><input type="checkbox" data-g="comorb" id="neuro"> Maladie neurologique</label>
+        <label><input type="checkbox" data-g="comorb" id="drepano"> Drépanocytose</label>
+        <label><input type="checkbox" data-g="comorb" id="hydroxyurea"> … traitée par hydroxycarbamide</label>
+        <label><input type="checkbox" data-g="comorb" id="thymus"> Myasthénie, thymome ou thymectomie</label>
+        <label><input type="checkbox" id="arthralgia"> Arthralgies préexistantes</label>
+        <label><input type="checkbox" id="complement"> Déficit en complément / properdine, anti-complément</label>
+        <label><input type="checkbox" id="antiIFN"> Auto-Ac anti-interféron connus</label>
+        <label><input type="checkbox" id="fluTarget"> Autre motif de vaccination grippale (calendrier)</label>
+      </div>
+      <div class="sublegend"><span>Immunodépression (tableau 4)</span></div>
+      <div class="checks">
+        <label><input type="checkbox" data-g="immuno" id="hiv"> Infection par le VIH</label>
+        <label><input type="checkbox" data-g="immuno" id="sotWait"> En attente de greffe d'organe, sans immunosuppresseur</label>
+        <label><input type="checkbox" data-g="immuno" id="sotDone"> Greffe d'organe solide réalisée</label>
+        <label><input type="checkbox" data-g="immuno" id="hsct"> Greffe de CSH (&lt; 2 ans, IS en cours ou GVH)</label>
+        <label><input type="checkbox" data-g="immuno" id="chemo"> Chimiothérapie en cours ou &lt; 6 mois</label>
+        <label><input type="checkbox" data-g="immuno" id="isDrug"> IS, biothérapie ou corticoïdes à dose IS en cours</label>
+        <label><input type="checkbox" data-g="immuno" id="isStop"> Arrêt d'IS &lt; 3 mois (rituximab &lt; 6 mois, bolus &lt; 3 mois)</label>
+        <label><input type="checkbox" data-g="immuno" id="dip"> Déficit immunitaire primitif (hors IgA isolé)</label>
+        <label><input type="checkbox" data-g="immuno" id="asplenia"> Asplénie ou hyposplénie</label>
+      </div>
+      <div class="row" id="cd4row" hidden>
+        <div class="field"><span class="lab">CD4 (/mm³) – adulte et enfant &gt; 5 ans</span><input type="number" id="cd4" min="0"></div>
+        <div class="field"><span class="lab">CD4 (%) – enfant &lt; 5 ans</span><input type="number" id="cd4pct" min="0" max="100"></div>
+      </div>
+      <div class="hint">Corticothérapie à dose immunosuppressive : adulte ≥ 10 mg/j d'équivalent prednisone depuis plus de 2 semaines ; enfant ≥ 2 mg/kg/j (et &gt; 20 mg/j au-delà de 10 kg) depuis plus de 2 semaines.</div>
+      <div class="sublegend"><span>Antécédents et traitements</span></div>
+      <div class="checks">
+        <label><input type="checkbox" data-g="hist" id="measles"> Antécédent certain de rougeole</label>
+        <label><input type="checkbox" data-g="hist" id="jaundice"> Ictère ou enfance en zone d'endémie VHA</label>
+        <label><input type="checkbox" data-g="hist" id="dengueRecent"> Dengue depuis moins de 6 mois</label>
+        <label><input type="checkbox" data-g="hist" id="mpox"> Infection antérieure par le mpox</label>
+        <label><input type="checkbox" data-g="hist" id="tbStay"> Séjour antérieur &gt; 1 mois en pays à forte incidence de tuberculose</label>
+        <label><input type="checkbox" id="smallpox1980"> Vacciné(e) contre la variole avant 1980</label>
+        <label><input type="checkbox" data-g="meds" id="antibio"> Antibiotique en cours ou récent</label>
+        <label><input type="checkbox" data-g="meds" id="antimal"> Chimioprophylaxie antipaludique prévue</label>
+      </div>
+      </div>
+    </details>
+
+    <details class="sec" open id="sec4">
+      <summary><span class="num">4</span><span class="sec-t">Statut vaccinal</span><span class="sec-sum" id="sum4"></span></summary>
+      <div class="sec-body">
+      <div class="vtable">
+        <span>dTP(Ca) – calendrier</span><span class="cell"><select id="dtp"><option value="ajour">À jour</option><option value="non">Non à jour</option><option value="inconnu">Inconnu</option></select></span>
+        <span>Dernière dose de vaccin polio</span><span class="cell"><input type="month" id="polioLast"></span>
+        <span>ROR (doses reçues)</span><span class="cell"><select id="ror"><option value="inconnu">Inconnu</option><option value="0">0</option><option value="1">1</option><option value="2">2</option></select><label><input type="checkbox" id="rorEarly"> 1re dose avant 12 mois</label></span>
+        <span>Fièvre jaune</span><span class="cell"><label><input type="checkbox" id="fjDone"> Vacciné(e)</label><input type="month" id="fjDate" aria-label="Date de vaccination fièvre jaune"></span>
+        <span class="hint">… circonstances</span><span class="cell"><label><input type="checkbox" id="fjUnder2"> avant 2 ans</label><label><input type="checkbox" id="fjPreg"> pendant une grossesse</label></span>
+        <span>Hépatite A (doses)</span><span class="cell"><select id="hepa"><option value="0">0</option><option value="1">1</option><option value="2">2</option></select></span>
+        <span>Hépatite B</span><span class="cell"><select id="hepb"><option value="inconnu">Inconnu</option><option value="0">0 dose</option><option value="1">1 dose</option><option value="2">2 doses</option><option value="3">Schéma complet</option><option value="immun">Immunité connue</option></select></span>
+        <span>Méningocoque ACWY (dernière dose)</span><span class="cell"><input type="month" id="men" aria-label="Dernière dose ACWY"><label><input type="checkbox" id="menConj" checked> conjugué</label></span>
+        <span>Typhoïde (dernière dose)</span><span class="cell"><input type="month" id="typh" aria-label="Dernière dose typhoïde"></span>
+        <span>Encéphalite japonaise (doses)</span><span class="cell"><select id="je"><option>0</option><option>1</option><option>2</option><option>3</option></select></span>
+        <span>Encéphalite à tiques (doses)</span><span class="cell"><select id="tbe"><option>0</option><option>1</option><option>2</option><option>3</option></select></span>
+        <span>Dengue – Qdenga® (doses)</span><span class="cell"><select id="dengueV"><option>0</option><option>1</option><option>2</option></select></span>
+        <span>Mpox – MVA-BN (doses)</span><span class="cell"><select id="mpoxV"><option>0</option><option>1</option><option>2</option><option>3</option></select></span>
+        <span>Autres</span><span class="cell"><label><input type="checkbox" id="chikV"> Chikungunya</label><label><input type="checkbox" id="rageV"> Rage pré-exposition</label><label><input type="checkbox" id="bcgV"> BCG</label></span>
+        <span>Saison en cours</span><span class="cell"><label><input type="checkbox" id="fluV"> Grippe</label><label><input type="checkbox" id="covidV"> Covid-19</label></span>
+      </div>
+      </div>
+    </details>
+
+  </form>
+
+  <section class="results" id="results" aria-live="polite">
+    <div class="board" id="summary"></div>
+    <div class="plan" id="timeline"></div>
+    <div class="alerts" id="alerts"></div>
+    <div id="groups" style="display:grid;gap:16px"></div>
+    <textarea class="copybox" id="copybox" readonly aria-label="Synthèse à copier"></textarea>
+  </section>
+</main>
+
+<footer class="foot">
+  <section>
+    <h2>Veille épidémiologique à consulter</h2>
+    <ul>
+      <li>Dengue : <a href="https://www.ecdc.europa.eu/en/dengue-monthly">ECDC – dengue monthly</a> (seuil HCSP : 100/100 000 personnes-années)</li>
+      <li>Chikungunya : <a href="https://www.santepubliquefrance.fr">Santé publique France</a>, ECDC Chikungunya worldwide overview</li>
+      <li>Poliomyélite : <a href="https://polioeradication.org/about-polio/polio-this-week/">GPEI – Polio this week</a></li>
+      <li>Mpox clade I : <a href="https://worldhealthorg.shinyapps.io/mpx_global/">OMS – mpx_global</a></li>
+      <li>Fièvre jaune et conditions d'entrée : <a href="https://www.diplomatie.gouv.fr/fr/conseils-aux-voyageurs/">MEAE – Conseils aux voyageurs</a>, site de l'OMS</li>
+      <li>Rage canine par pays : site de l'OMS ; Europe : bulletins de veille de la plateforme ESA</li>
+    </ul>
+  </section>
+  <section>
+    <h2>Points du document à surveiller</h2>
+    <ul>
+      <li>Hydroxycarbamide et fièvre jaune : « théoriquement contre-indiquée » (p. 41) contre « ne constitue pas une contre-indication » (p. 149).</li>
+      <li>Tableau 15 : obligations OMS de janvier 2023, actualisation OMS en cours en mai 2026.</li>
+      <li>Tuberculose : la liste régionale du § 1.17 et l'annexe 3 (OMS 2024) ne coïncident pas (ex. Corée du Nord, Taïwan, Comores ; statut de l'Égypte contradictoire).</li>
+      <li>Covid et pèlerinage : critères différents p. 26 et p. 141.</li>
+      <li>ROR : rattrapage « quels que soient les antécédents » (p. 69) contre « sans antécédent de rougeole » (p. 10).</li>
+      <li>Numérotation : la typhoïde est numérotée « 1.1 » ; renvois « § 1.6 » pour la fièvre jaune (§ 1.7) et « § 1.16 » pour la rage (§ 1.15).</li>
+    </ul>
+  </section>
+  <section>
+    <h2>Limites</h2>
+    <ul>
+      <li>Outil d'aide à la décision : il ne remplace ni l'examen clinique, ni le RCP des vaccins, ni l'avis d'un centre de vaccinations internationales.</li>
+      <li>Ne couvre pas la chimioprophylaxie du paludisme (annexe 4) ni les mesures non vaccinales.</li>
+      <li>Les règles reflètent le document du 12 juin 2026 ; toute nouvelle édition impose une mise à jour.</li>
+      <li>Régions de l'Europe selon le géoschéma de l'ONU pour l'application des termes « Europe de l'Est / du Sud » du document.</li>
+    </ul>
+  </section>
+</footer>
+<a class="jump" id="jump" href="#results">Voir le plan</a>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/*__COUNTRIES__*/
+/*__STATIC__*/
+/*__ENGINE__*/
+/*__UI__*/
+</script>
+</body>
+</html>
